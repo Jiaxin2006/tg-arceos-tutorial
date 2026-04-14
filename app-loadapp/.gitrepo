@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/arceos-org/app-loadapp
 	branch = main
-	commit = 5151d14e275834363cf6a9293218e3952bac3986
-	parent = 4632ed48aceb8c9a2b5f4603e6141ce3926cbeab
+	commit = 6d49fc8b18574e1e6ae9958cc4bafae6e8b82f21
+	parent = bc44184d8616c03039eb48149ee8872e42c2817b
 	method = merge
 	cmdver = 0.4.9
