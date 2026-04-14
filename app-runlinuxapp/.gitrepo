@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/arceos-org/app-runlinuxapp
 	branch = main
-	commit = 28dcbb1529adeaf4767f43fe2d257d8d1b13a7fa
-	parent = e2cf38d3bc953bcd77b5aa8e010bc9289e1daca7
+	commit = b0c5334b2222981ba7a9bc06ac511e72884d734e
+	parent = 6695e23e8ac833c30a4b18b1a5549da59591e50a
 	method = merge
 	cmdver = 0.4.9
