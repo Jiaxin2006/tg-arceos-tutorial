@@ -1,6 +1,6 @@
 [package]
 name = "arceos-collections"
-version = "0.4.6"
+version = "0.4.7"
 edition = "2024"
 authors = ["Lei Shi <shi_lei@massclouds.com>", "Yu Chen <yuchen@tsinghua.edu.cn>"]
 description = "A simple collections (String, Vec) crate (from crates.io) for ArceOS"

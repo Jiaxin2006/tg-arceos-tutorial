@@ -1,6 +1,6 @@
 [package]
 name = "tg-arceos-tutorial"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2024"
 authors = ["LearningOS Team"]
 description = "Meta crate bundle for ArceOS tutorial apps, with offline archive and extract scripts."

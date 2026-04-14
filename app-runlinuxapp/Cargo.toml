@@ -1,6 +1,6 @@
 [package]
 name = "arceos-runlinuxapp"
-version = "0.4.6"
+version = "0.4.7"
 edition = "2024"
 authors = ["Yu Chen <yuchen@tsinghua.edu.cn>"]
 description = "Run Linux ELF applications on ArceOS: loads and runs a user-space Linux app (compiled with musl libc) with ELF parsing, syscall handling, and multi-architecture support"

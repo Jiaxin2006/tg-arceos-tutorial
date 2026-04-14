@@ -1,6 +1,6 @@
 [package]
 name = "arceos-helloworld"
-version = "0.4.10"
+version = "0.4.11"
 edition = "2024"
 authors = ["Yuekai Jia <equation618@gmail.com>", "Yu Chen <yuchen@tsinghua.edu.cn>"]
 description = "A simple helloworld crate (from crates.io) for ArceOS"
