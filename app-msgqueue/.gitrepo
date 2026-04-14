@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/arceos-org/app-msgqueue
 	branch = main
-	commit = 0f9f5a828abab846b929d9447edeb643c9b95589
-	parent = 0af43f7bcaba965ab182d1f845dcd0adf6b1b69d
+	commit = 4641b8e40000347792a12c657683f4716c4a1af1
+	parent = 2966f88a91a1683b8a4f0c57b7299d3cd475af6a
 	method = merge
 	cmdver = 0.4.9
