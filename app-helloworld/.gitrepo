@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/arceos-org/app-helloworld
 	branch = main
-	commit = ba4876d6ff35cefd78163969b9926a7e8b44fb74
-	parent = 04d1d5795222c9336481d6e7cbc9a177f1b6218d
+	commit = 36725c7d9009f10dc303f03eee4274ae4691d528
+	parent = e1dba264d4d59cc6742cec43900912ca5e77846a
 	method = merge
 	cmdver = 0.4.9
