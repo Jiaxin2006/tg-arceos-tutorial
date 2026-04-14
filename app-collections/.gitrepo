@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/arceos-org/app-collections
 	branch = main
-	commit = e9dcc2c48fa0648cc8f1898361949392b81c1257
-	parent = 6cd16659daa4ee084137460fe4e5588af4c057d2
+	commit = 508248817bc7d720a16b95097102bc4ead28bd9e
+	parent = 35a35d7e70da9cb9fb72d74431e8231cd69e9e0f
 	method = merge
 	cmdver = 0.4.9
