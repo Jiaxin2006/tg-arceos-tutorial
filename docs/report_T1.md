@@ -351,7 +351,7 @@ fn sys_mmap(_addr, length, prot, flags, fd, offset) -> isize {
 
 ## 学习效果总结
 
-### 🎯 核心知识点
+### 核心知识点
 
 
 | 练习           | 核心概念          | 关键技术                                             |
@@ -363,7 +363,7 @@ fn sys_mmap(_addr, length, prot, flags, fd, offset) -> isize {
 | sysmap       | 用户态系统调用       | 页表映射, 地址空间, mmap 语义                              |
 
 
-### 💡 最大收获
+### 最大收获
 
 1. **Cargo 的两种本地覆盖方式**：`path` 依赖（直接替换）vs `[patch.crates-io]`（保持依赖树一致性）
 2. **Bump Allocator 的设计哲学**：极简（O(1) 分配）但有局限（无法单独释放），适合 boot 阶段
@@ -371,7 +371,7 @@ fn sys_mmap(_addr, length, prot, flags, fd, offset) -> isize {
 4. **mmap 的最小实现**：分配物理页 → 映射到虚拟地址 → 复制文件内容 → 返回地址
 5. **并发安全意识**：`spin::RwLock` 不支持重入，需要用 `core::ptr::eq` 检测同目录避免死锁
 
-### 🤖 AI 协作的体会
+### AI 协作的体会
 
 **AI 擅长的事**：快速生成 trait 实现代码、跨文件分析依赖关系、从已有代码模式推断接口签名。
 
@@ -379,25 +379,28 @@ fn sys_mmap(_addr, length, prot, flags, fd, offset) -> isize {
 
 ---
 
-## 编译测试与 Bug 修复报告（最终版）
+## 编译测试与 Bug 修复过程
 
 ### 测试环境
+
 - **测试时间**: 2026 年 4 月 19 日
 - **宿主机**: macOS Darwin 25.2.0 (aarch64, Apple Silicon)
 - **Rust 工具链**: `nightly-2025-12-12-aarch64-apple-darwin`（项目 `rust-toolchain.toml` 指定）
 - **QEMU**: `qemu-system-{riscv64,aarch64}` 10.2.1（Homebrew）
 - **C 交叉工具链**（仅 sysmap 需要）: `aarch64-unknown-linux-musl` 15.2.0
-  （通过 `brew tap messense/macos-cross-toolchains && brew install aarch64-unknown-linux-musl` 获得）
+（通过 `brew tap messense/macos-cross-toolchains && brew install aarch64-unknown-linux-musl` 获得）
 
 ### 测试结果概览
 
-| Exercise | 目标架构 | 编译 | 运行 | 是否有 Bug | 备注 |
-|----------|---------|------|------|-----------|------|
-| exercise-printcolor    | riscv64 | ✅ | ✅ | 无 | 输出绿色 `[WithColor]: Hello, Arceos!` |
-| exercise-hashmap       | riscv64 | ✅ | ✅ | ✅ 已修复 | hashbrown 缺 `default-hasher` feature |
-| exercise-altalloc      | riscv64 | ✅ | ✅ | ✅ 已修复 | 用错了错误类型 `LinuxError` → `AllocError` |
-| exercise-ramfs-rename  | riscv64 | ✅ | ✅ | ✅ 已修复 | 3 处 bug（见下） |
-| exercise-sysmap        | aarch64 | ✅ | ✅ | 无 | 用户态打印 `Read back content: hello, arceos!` |
+
+| Exercise              | 目标架构    | 编译  | 运行  | 是否有 Bug | 备注                                        |
+| --------------------- | ------- | --- | --- | ------- | ----------------------------------------- |
+| exercise-printcolor   | riscv64 | ✅   | ✅   | 无       | 输出绿色 `[WithColor]: Hello, Arceos!`        |
+| exercise-hashmap      | riscv64 | ✅   | ✅   | ✅ 已修复   | hashbrown 缺 `default-hasher` feature      |
+| exercise-altalloc     | riscv64 | ✅   | ✅   | ✅ 已修复   | 用错了错误类型 `LinuxError` → `AllocError`       |
+| exercise-ramfs-rename | riscv64 | ✅   | ✅   | ✅ 已修复   | 3 处 bug（见下）                               |
+| exercise-sysmap       | aarch64 | ✅   | ✅   | 无       | 用户态打印 `Read back content: hello, arceos!` |
+
 
 > 说明：sysmap 用 aarch64 而非 riscv64，因为 macOS 上暂无 `riscv64-linux-musl-gcc`，但 `aarch64-linux-musl-gcc` 可通过 brew 安装；代码本身是架构无关的。
 
@@ -614,14 +617,14 @@ monolithic kernel exit [Some(0)] normally!
 
 ### 修复文件清单
 
-| 文件 | 修改内容 |
-|------|---------|
-| `exercise-hashmap/axstd/Cargo.toml` | `hashbrown` 追加 `default-hasher` feature |
+
+| 文件                                                    | 修改内容                                                                 |
+| ----------------------------------------------------- | -------------------------------------------------------------------- |
+| `exercise-hashmap/axstd/Cargo.toml`                   | `hashbrown` 追加 `default-hasher` feature                              |
 | `exercise-altalloc/modules/bump_allocator/src/lib.rs` | 导入 `AllocError`，替换 3 处 `LinuxError::ENOMEM` → `AllocError::NoMemory` |
-| `exercise-ramfs-rename/axfs_ramfs/src/dir.rs` | 修复 `navigate_to` 中的 `Arc<Self>` 调用 |
-| `exercise-ramfs-rename/src/main.rs` | 修复 `io::Error` 的比较方式 |
-| `exercise-ramfs-rename/axfs/src/root.rs` | `RootDirectory` 新增 `rename` 方法，转发到挂载 fs |
+| `exercise-ramfs-rename/axfs_ramfs/src/dir.rs`         | 修复 `navigate_to` 中的 `Arc<Self>` 调用                                   |
+| `exercise-ramfs-rename/src/main.rs`                   | 修复 `io::Error` 的比较方式                                                 |
+| `exercise-ramfs-rename/axfs/src/root.rs`              | `RootDirectory` 新增 `rename` 方法，转发到挂载 fs                              |
 
-### 五个练习最终状态
 
-所有五个练习在 macOS (Apple Silicon) 的 QEMU 上编译、运行、测试全部通过。共修复 **5 处 bug**（2 个 feature/依赖类，1 个类型错误，1 个 trait 调用错误，1 个 VFS 转发缺失）。
+所有五个练习在 macOS (Apple Silicon) 的 QEMU 上编译、运行、测试全部通过。
