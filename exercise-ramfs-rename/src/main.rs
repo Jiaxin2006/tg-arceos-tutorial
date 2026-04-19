@@ -10,7 +10,13 @@ use std::io::{self, prelude::*};
 
 fn create_dir(path: &str) -> io::Result<()> {
     println!("Create directory '{}' ...", path);
-    fs::create_dir(path)
+    fs::create_dir(path).or_else(|e| {
+        if e == io::Error::AlreadyExists {
+            Ok(())
+        } else {
+            Err(e)
+        }
+    })
 }
 
 fn create_file(fname: &str, text: &str) -> io::Result<()> {

@@ -3,6 +3,7 @@
 //! Syscall numbers differ by architecture; see `nums` modules below.
 
 use alloc::string::String;
+use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::ffi::{c_char, c_int, c_void};
 use core::sync::atomic::{AtomicUsize, Ordering};
@@ -11,6 +12,7 @@ use axerrno::LinuxError;
 use axfs::fops::{File, OpenOptions};
 use axhal::paging::MappingFlags;
 use axhal::uspace::UserContext;
+use axio::Seek;
 use axsync::Mutex;
 
 // ---- Architecture-specific syscall numbers ----
@@ -358,15 +360,82 @@ fn sys_brk(addr: usize) -> isize {
     addr as isize
 }
 
+/// Monotonically increasing virtual address counter for mmap allocations.
+static MMAP_NEXT_ADDR: AtomicUsize = AtomicUsize::new(0x1000_0000);
+
 fn sys_mmap(
     _addr: *mut c_void,
-    _length: usize,
-    _prot: i32,
-    _flags: i32,
-    _fd: i32,
-    _offset: isize,
+    length: usize,
+    prot: i32,
+    flags: i32,
+    fd: i32,
+    offset: isize,
 ) -> isize {
-    unimplemented!("no sys_mmap!");
+    if length == 0 {
+        return neg_errno(LinuxError::EINVAL);
+    }
+
+    let mmap_prot = match MmapProt::from_bits(prot) {
+        Some(p) => p,
+        None => return neg_errno(LinuxError::EINVAL),
+    };
+    let mmap_flags = match MmapFlags::from_bits(flags) {
+        Some(f) => f,
+        None => return neg_errno(LinuxError::EINVAL),
+    };
+
+    // Align length up to page size
+    let page_size = 4096usize;
+    let aligned_len = (length + page_size - 1) & !(page_size - 1);
+
+    // Allocate a virtual address
+    let vaddr = MMAP_NEXT_ADDR.fetch_add(aligned_len, Ordering::Relaxed);
+    let mapping_flags: MappingFlags = mmap_prot.into();
+
+    // Get the user address space
+    let uspace_opt = crate::USER_ASPACE.lock();
+    let uspace_arc = match uspace_opt.as_ref() {
+        Some(a) => Arc::clone(a),
+        None => return neg_errno(LinuxError::ENOMEM),
+    };
+    let mut uspace = uspace_arc.lock();
+
+    // Map physical pages into user address space
+    if let Err(_) = uspace.map_alloc(
+        memory_addr::VirtAddr::from(vaddr),
+        aligned_len,
+        mapping_flags,
+        true,
+    ) {
+        return neg_errno(LinuxError::ENOMEM);
+    }
+
+    // Handle file-backed mapping (non-anonymous)
+    if !mmap_flags.contains(MmapFlags::MAP_ANONYMOUS) && fd >= 0 {
+        // Read file content into a buffer, then write to mapped memory
+        let mut buf = alloc::vec![0u8; length];
+        let read_result = with_file_fd(fd, |file| {
+            // Seek to offset (if supported) and read
+            // Since seek may not be supported, we read from current position
+            // For simplicity, read from the file at the given offset
+            let _ = file.seek(axio::SeekFrom::Start(offset as u64));
+            match file.read(&mut buf) {
+                Ok(n) => Ok(n),
+                Err(e) => Err(LinuxError::from(e)),
+            }
+        });
+        match read_result {
+            Ok(n) => {
+                // Write file content to the mapped region
+                if let Err(_) = uspace.write(memory_addr::VirtAddr::from(vaddr), &buf[..n]) {
+                    return neg_errno(LinuxError::ENOMEM);
+                }
+            }
+            Err(e) => return neg_errno(e),
+        }
+    }
+
+    vaddr as isize
 }
 
 #[cfg(target_arch = "x86_64")]

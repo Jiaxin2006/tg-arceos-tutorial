@@ -21,7 +21,7 @@ path = "xtask/src/main.rs"
 required-features = ["xtask"]
 
 [dependencies]
-axstd = { version = "=0.3.0-preview.1", features = ["defplat", "alloc"], optional = true }
+axstd = { path = "./axstd", features = ["defplat", "alloc"], optional = true }
 clap = { version = "4", features = ["derive"], optional = true }
 
 [profile.release]

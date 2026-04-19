@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 axallocator = { version = "0.2.0", features = ["axerrno", "bitmap"] }
+axerrno = "0.2.2"
